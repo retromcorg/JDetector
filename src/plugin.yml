@@ -1,0 +1,6 @@
+name: JDetector
+description: A VPN detector plugin designed primary for RetroMC
+main: com.johnymuffin.beta.jdetector.JDetector
+version: 1.0.0
+authors:
+  - JohnyMuffin
