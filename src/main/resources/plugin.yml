@@ -1,0 +1,14 @@
+name: JDetector
+description: A VPN detector plugin for Project Poseidon that utilizes the IP Quality Score API to detect potential VPN users.
+main: com.johnymuffin.beta.jdetector.JDetector
+version: ${project.version}
+authors:
+  - JohnyMuffin
+commands:
+    jdetector:
+        description: Main command for JDetector
+        usage: /jdetector <reload|set|ip|check>
+        permission: jdetector.use
+        aliases:
+        - jd
+        - vpn
