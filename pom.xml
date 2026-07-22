@@ -60,6 +60,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                             <relocations>
                                 <!-- Define the relocation of httpclient5 -->
                                 <relocation>
