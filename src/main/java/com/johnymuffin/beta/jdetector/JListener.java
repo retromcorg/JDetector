@@ -9,15 +9,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerPreLoginEvent;
-import org.bukkit.plugin.Plugin;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.logging.Level;
@@ -90,8 +86,7 @@ public class JListener implements Listener {
                 JSONObject response = null;
 
                 // Read response
-                InputStream is = connection.getInputStream();
-                try {
+                try (InputStream is = connection.getInputStream()) {
                     BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
                     String jsonText = readAll(rd);
                     JSONParser parser = new JSONParser();
@@ -100,22 +95,14 @@ public class JListener implements Listener {
                     jDetector.logger(Level.WARNING, "An exception occurred while reading the response from IPHub for " + playerIP);
                     exception.printStackTrace();
                     ipHubConnectionPause.removeConnectionPause();
-                } finally {
-                    is.close();
+                    return;
                 }
 
-                JSONObject finalResponse = response;
-                Bukkit.getScheduler().scheduleSyncDelayedTask(this.jDetector, () -> {
-                    ipHubConnectionPause.removeConnectionPause();
-                    boolean isLikelyProxy = false;
-                    if(Integer.parseInt(finalResponse.get("block").toString()) >= 1) {
-                        isLikelyProxy = true;
-                    }
+                ipHubConnectionPause.removeConnectionPause();
+                boolean isLikelyProxy = Integer.parseInt(response.get("block").toString()) >= 1;
 
-                    // Save IP information
-                    jDetector.getJIPCache().saveIPData(playerIP, isLikelyProxy);
-                });
-
+                // Save IP information
+                jDetector.getJIPCache().saveIPData(playerIP, isLikelyProxy);
 
             } catch (Exception exception) {
                 ipHubConnectionPause.removeConnectionPause();

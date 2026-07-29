@@ -46,35 +46,28 @@ public class JIPCache {
             memoryOnly = true;
             ipCacheJSON = new JSONObject();
         }
-        saveData();
-
     }
 
-    public void saveIPData(String ip, boolean vpn) {
+    public synchronized void saveIPData(String ip, boolean vpn) {
         JSONObject ipData = new JSONObject();
         ipData.put("vpn", vpn);
         ipData.put("lastChecked", (System.currentTimeMillis()/1000L));
         ipCacheJSON.put(ip, ipData);
-        this.saveData();
     }
 
-    public boolean isIPSaved(String ip) {
+    public synchronized boolean isIPSaved(String ip) {
         return ipCacheJSON.containsKey(ip);
     }
 
-    public boolean isVPN(String ip) {
+    public synchronized boolean isVPN(String ip) {
         return Boolean.valueOf(String.valueOf(((JSONObject) ipCacheJSON.get(ip)).get("vpn")));
     }
 
-    public long getLastChecked(String ip) {
+    public synchronized long getLastChecked(String ip) {
         return Long.valueOf(String.valueOf(((JSONObject) ipCacheJSON.get(ip)).get("lastChecked")));
     }
 
-    public void saveData() {
-        saveJsonArray();
-    }
-
-    private void saveJsonArray() {
+    public synchronized void saveData() {
         if (memoryOnly) {
             return;
         }
@@ -86,5 +79,4 @@ public class JIPCache {
             plugin.logger(Level.WARNING, "Error saving ipCache.json: " + e + " : " + e.getMessage());
         }
     }
-
 }
