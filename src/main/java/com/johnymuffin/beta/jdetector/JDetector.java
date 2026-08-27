@@ -6,7 +6,8 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,7 +24,7 @@ public class JDetector extends JavaPlugin {
 
     private JSettings jSettings;
 
-    private HashMap<String, BetaEvolutionsUtils.VerificationResults> betaEVOVerificationResults = new HashMap<>();
+    private Map<String, BetaEvolutionsUtils.VerificationResults> betaEVOVerificationResults = new ConcurrentHashMap<>();
 
 
     @Override
@@ -51,7 +52,7 @@ public class JDetector extends JavaPlugin {
         return jSettings;
     }
 
-    public HashMap<String, BetaEvolutionsUtils.VerificationResults> getBetaEVOVerificationResults() {
+    public Map<String, BetaEvolutionsUtils.VerificationResults> getBetaEVOVerificationResults() {
         return betaEVOVerificationResults;
     }
 
