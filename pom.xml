@@ -6,7 +6,7 @@
 
     <groupId>com.johnymuffin.beta</groupId>
     <artifactId>jdetector</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
 
     <properties>
         <java.version>25</java.version>
