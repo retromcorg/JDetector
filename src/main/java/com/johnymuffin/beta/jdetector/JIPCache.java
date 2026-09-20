@@ -1,8 +1,8 @@
 package com.johnymuffin.beta.jdetector;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 
 import java.io.File;
 import java.io.FileReader;
@@ -12,7 +12,7 @@ import java.util.logging.Level;
 
 public class JIPCache {
     private JDetector plugin;
-    private JSONObject ipCacheJSON;
+    private JsonObject ipCacheJSON;
     private File cacheFile;
     private boolean memoryOnly = false;
 
@@ -25,8 +25,8 @@ public class JIPCache {
             try {
                 FileWriter file = new FileWriter(cacheFile);
                 plugin.logger(Level.INFO, "Generating ipCache.json file");
-                ipCacheJSON = new JSONObject();
-                file.write(ipCacheJSON.toJSONString());
+                ipCacheJSON = new JsonObject();
+                file.write(ipCacheJSON.toString());
                 file.flush();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -36,55 +36,46 @@ public class JIPCache {
 
         try {
             plugin.logger(Level.INFO, "Reading ipCache.json file");
-            JSONParser parser = new JSONParser();
-            ipCacheJSON = (JSONObject) parser.parse(new FileReader(cacheFile));
-        } catch (ParseException e) {
+            ipCacheJSON = (JsonObject) JsonParser.parseReader(new FileReader(cacheFile));
+        } catch (JsonParseException e) {
             plugin.logger(Level.WARNING, "ipCache.json file is corrupt, resetting file: " + e + " : " + e.getMessage());
-            ipCacheJSON = new JSONObject();
+            ipCacheJSON = new JsonObject();
         } catch (Exception e) {
             plugin.logger(Level.WARNING, "ipCache.json file is corrupt, changing to memory only mode.");
             memoryOnly = true;
-            ipCacheJSON = new JSONObject();
+            ipCacheJSON = new JsonObject();
         }
-        saveData();
-
     }
 
-    public void saveIPData(String ip, boolean vpn) {
-        JSONObject ipData = new JSONObject();
-        ipData.put("vpn", vpn);
-        ipData.put("lastChecked", (System.currentTimeMillis()/1000L));
-        ipCacheJSON.put(ip, ipData);
-        this.saveData();
+    public synchronized void saveIPData(String ip, boolean vpn) {
+        JsonObject ipData = new JsonObject();
+        ipData.addProperty("vpn", vpn);
+        ipData.addProperty("lastChecked", (System.currentTimeMillis()/1000L));
+        ipCacheJSON.add(ip, ipData);
     }
 
-    public boolean isIPSaved(String ip) {
-        return ipCacheJSON.containsKey(ip);
+    public synchronized boolean isIPSaved(String ip) {
+        return ipCacheJSON.has(ip);
     }
 
-    public boolean isVPN(String ip) {
-        return Boolean.valueOf(String.valueOf(((JSONObject) ipCacheJSON.get(ip)).get("vpn")));
+    public synchronized boolean isVPN(String ip) {
+        return ipCacheJSON.get(ip).getAsJsonObject().get("vpn").getAsBoolean();
     }
 
-    public long getLastChecked(String ip) {
-        return Long.valueOf(String.valueOf(((JSONObject) ipCacheJSON.get(ip)).get("lastChecked")));
+    public synchronized long getLastChecked(String ip) {
+        return ipCacheJSON.get(ip).getAsJsonObject().get("lastChecked").getAsLong();
     }
 
-    public void saveData() {
-        saveJsonArray();
-    }
-
-    private void saveJsonArray() {
+    public synchronized void saveData() {
         if (memoryOnly) {
             return;
         }
         try (FileWriter file = new FileWriter(cacheFile)) {
             plugin.logger(Level.INFO, "Saving ipCache.json");
-            file.write(ipCacheJSON.toJSONString());
+            file.write(ipCacheJSON.toString());
             file.flush();
         } catch (IOException e) {
             plugin.logger(Level.WARNING, "Error saving ipCache.json: " + e + " : " + e.getMessage());
         }
     }
-
 }
